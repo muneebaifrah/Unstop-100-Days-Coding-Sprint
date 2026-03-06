@@ -1,42 +1,54 @@
-# Python 3
 import sys
 
+# Python 3
 class Node:
     def __init__(self, x):
         self.val = x
         self.next = None
 
 def minChanges(head, n):
-    arr = []
+    # Step 1: Collect values from the Linked List into a list
+    current_heights = []
     curr = head
-
-    # store linked list values
     while curr:
-        arr.append(curr.val)
+        current_heights.append(curr.val)
         curr = curr.next
-
-    # sorted order
-    sorted_arr = sorted(arr)
-
-    # count mismatches
-    count = 0
+    
+    # Step 2: Create a sorted version of the heights
+    expected_heights = sorted(current_heights)
+    
+    # Step 3: Compare both lists and count the mismatches
+    changes = 0
     for i in range(n):
-        if arr[i] != sorted_arr[i]:
-            count += 1
+        if current_heights[i] != expected_heights[i]:
+            changes += 1
+            
+    return changes
 
-    return count
+def main():
+    # Reading large input efficiently
+    input_data = sys.stdin.read().split()
+    if not input_data:
+        return
+    
+    n = int(input_data[0])
+    values = list(map(int, input_data[1:n+1]))
+    
+    # Building the Linked List as per problem structure
+    if not values:
+        print(0)
+        return
+        
+    head = Node(values[0])
+    temp = head
+    for val in values[1:]:
+        temp.next = Node(val)
+        temp = temp.next
+    
+    # Calculate and print result
+    result = minChanges(head, n)
+    print(result)
 
-
-# -------- input handling --------
-n = int(sys.stdin.readline().strip())
-values = list(map(int, sys.stdin.readline().split()))
-
-# build linked list
-head = Node(values[0])
-curr = head
-for v in values[1:]:
-    curr.next = Node(v)
-    curr = curr.next
-
-# output
-print(minChanges(head, n))
+if __name__ == "__main__":
+    main()
+                
