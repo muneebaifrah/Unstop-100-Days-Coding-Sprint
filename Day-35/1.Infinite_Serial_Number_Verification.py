@@ -13,3 +13,8 @@ def find_digit_at_position(N):
     digit_index = (N - 1) % length
 
     return str(number)[digit_index]
+
+
+N = int(input())
+print(find_digit_at_position(N))
+                
