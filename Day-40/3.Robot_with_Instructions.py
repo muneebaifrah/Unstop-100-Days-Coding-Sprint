@@ -1,39 +1,34 @@
-def execute_instructions(n, pos, instruction):
-    m = len(instruction)
-    answer = [0] * m  # Initialize the answer array
-
-    # For each starting point in the instruction string
-    for i in range(m):
-        row, col = pos  # Start from the initial position
-        steps = 0
-        
-        # Execute instructions starting from i
-        for j in range(i, m):
-            move = instruction[j]
-            if move == 'L':
-                col -= 1
-            elif move == 'R':
-                col += 1
-            elif move == 'U':
-                row -= 1
-            elif move == 'D':
-                row += 1
-            
-            # Check if robot is out of bounds
-            if row < 0 or row >= n or col < 0 or col >= n:
-                break
-            steps += 1
-        
-        answer[i] = steps
-
-    return answer
-
-# Reading input and testing the function
-if __name__ == "__main__":
-    n = int(input())
+def solve():
+    n = int(input().strip())
     pos = list(map(int, input().split()))
-    m = int(input())
-    instruction = input().strip()
+    m_line = input().split()
+    if len(m_line) == 1:  # m and s are given on separate lines
+        m = int(m_line[0])
+        s = input().strip()
+    else:  # m and s given on same line
+        m = int(m_line[0])
+        s = m_line[1]
 
-    result = execute_instructions(n, pos, instruction)
-    print(*result)
+    start_r, start_c = pos
+    ans = [0] * m
+
+    # Directions
+    moves = {'L': (0, -1), 'R': (0, 1), 'U': (-1, 0), 'D': (1, 0)}
+
+    for i in range(m):
+        r, c = start_r, start_c
+        cnt = 0
+        for j in range(i, m):
+            dr, dc = moves[s[j]]
+            r, c = r + dr, c + dc
+            if not (0 <= r < n and 0 <= c < n):
+                break
+            cnt += 1
+        ans[i] = cnt
+
+    print(*ans)
+
+
+if __name__ == "__main__":
+    solve()
+                
