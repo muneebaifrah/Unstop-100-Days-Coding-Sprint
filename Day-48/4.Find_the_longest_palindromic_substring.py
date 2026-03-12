@@ -1,29 +1,41 @@
-def longest_palindromic_substring(s):
-    start, max_len = 0, 1
+import sys
+
+def longestPalindrome(s):
+    if not s or len(s) < 1:
+        return ""
     
-    def expand_around_center(left, right):
+    start = 0
+    end = 0
+    
+    def expandAroundCenter(left, right):
+        # Expand as long as indices are in bounds and characters match
         while left >= 0 and right < len(s) and s[left] == s[right]:
             left -= 1
             right += 1
-        # return the length of palindrome and starting index
-        return (right - left - 1, left + 1)
-    
-    for i in range(len(s)):
-        # Odd length palindrome
-        length1, start1 = expand_around_center(i, i)
-        # Even length palindrome
-        length2, start2 = expand_around_center(i, i + 1)
-        
-        if length1 > max_len:
-            max_len = length1
-            start = start1
-        if length2 > max_len:
-            max_len = length2
-            start = start2
-            
-    return s[start:start + max_len]
+        # Return the length of the palindrome found
+        # (right - 1) - (left + 1) + 1 = right - left - 1
+        return right - left - 1
 
-# Read input
-s = input().strip()
-print(longest_palindromic_substring(s))
-                
+    for i in range(len(s)):
+        # Case 1: Odd length palindrome (center is s[i])
+        len1 = expandAroundCenter(i, i)
+        # Case 2: Even length palindrome (center is between s[i] and s[i+1])
+        len2 = expandAroundCenter(i, i + 1)
+        
+        # Take the maximum of the two expansion types
+        max_len = max(len1, len2)
+        
+        # Update the global start and end indices if a longer palindrome is found
+        if max_len > (end - start):
+            # Calculate new start/end indices based on center i and max_len
+            start = i - (max_len - 1) // 2
+            end = i + max_len // 2
+            
+    return s[start:end + 1]
+
+if __name__ == "__main__":
+    # Reading input and stripping whitespace
+    line = sys.stdin.read().strip()
+    if line:
+        result = longestPalindrome(line)
+        print(result)
