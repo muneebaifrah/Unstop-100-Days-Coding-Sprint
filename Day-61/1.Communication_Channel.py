@@ -1,49 +1,71 @@
-mod = 10**9 + 7
+MOD = 10**9 + 7
 
-import sys,math
-input_data = sys.stdin.read().strip().split()
-if not input_data:
-    exit()
-it = iter(input_data)
-N = int(next(it))
-K = int(next(it))
-# We ignore the fact that the graph is complete – our design is completely determined by the weights.
-# (There are no further inputs because the design is what we choose.)
+def count_distinct_network_designs(N, K):
+    M = N - 1  # number of star edges (1 to others)
+    if M == 0:
+        return 1
 
-# Let m = number of edges incident to vertex 1 (the star edges)
-m = N - 1
+    maxE = M * (M - 1) // 2  # maximum possible exponent used below
 
-# Precompute factorials and inverse factorials up to m.
-fac = [1]*(m+1)
-invfac = [1]*(m+1)
-for i in range(1, m+1):
-    fac[i] = fac[i-1]*i % mod
-invfac[m] = pow(fac[m], mod-2, mod)
-for i in range(m, 0, -1):
-    invfac[i-1] = invfac[i]*i % mod
+    # factorials for nCr up to M
+    fact = [1] * (M + 1)
+    for i in range(1, M + 1):
+        fact[i] = fact[i - 1] * i % MOD
 
-# DP[i][r] will be the sum (mod mod) after processing cost values 1..i,
-# with r star-edges assigned (in sorted order).
-# We process i = 0,1,...,K. (When i=K, we have processed all allowed costs.)
-dp = [[0]*(m+1) for _ in range(K+1)]
-dp[0][0] = 1
+    invfact = [1] * (M + 1)
+    invfact[M] = pow(fact[M], MOD - 2, MOD)
+    for i in range(M, 0, -1):
+        invfact[i - 1] = invfact[i] * i % MOD
 
-# Process values 1 through K.
-for i in range(K):
-    # When processing cost = i+1, the factor available is:
-    F = K - i  # because F = K - (i+1) + 1.
-    for r in range(m+1):
-        if dp[i][r] == 0:
-            continue
-        # t = number of star-edges that we assign the cost (i+1).
-        max_t = m - r
-        for t in range(max_t+1):
-            new_r = r + t
-            # The exponent E = binom(t,2) + t * r.
-            E = (t*(t-1))//2 + t*r
-            contrib = invfac[t] * pow(F, E, mod) % mod
-            dp[i+1][new_r] = (dp[i+1][new_r] + dp[i][r] * contrib) % mod
+    def nCr(n, r):
+        if r < 0 or r > n:
+            return 0
+        return fact[n] * invfact[r] % MOD * invfact[n - r] % MOD
 
-# Finally, multiply by m! to account for ordering (recover the multinomial coefficient)
-ans = fac[m] * dp[K][m] % mod
-print(ans)
+    # dp[p] = ways after assigning some weights, where p vertices have been assigned star weights so far
+    dp = [0] * (M + 1)
+    dp[0] = 1
+
+    # Iterate star weight value t = 1..K
+    # base(t) = number of choices for a non-star edge whose max endpoint-star-weight == t
+    for t in range(1, K + 1):
+        base = K - t + 1  # in [1..K]
+
+        # Precompute base^e for e=0..maxE in O(maxE)
+        pow_base = [1] * (maxE + 1)
+        for e in range(1, maxE + 1):
+            pow_base[e] = (pow_base[e - 1] * base) % MOD
+
+        dp2 = [0] * (M + 1)
+        for p_old in range(M + 1):
+            if dp[p_old] == 0:
+                continue
+            remaining = M - p_old
+
+            # choose c vertices to have star-weight exactly t
+            for c in range(remaining + 1):
+                # number of pairs (u,v) whose max star-weight becomes exactly t contributed at this step:
+                # c * p_old  (pairs between new vertices and previous vertices)
+                # + C(c,2)   (pairs within the new vertices)
+                e = c * p_old + (c * (c - 1)) // 2
+
+                ways = dp[p_old]
+                ways = ways * nCr(remaining, c) % MOD
+                ways = ways * pow_base[e] % MOD
+
+                dp2[p_old + c] = (dp2[p_old + c] + ways) % MOD
+
+        dp = dp2
+
+    return dp[M]
+
+
+def main():
+    import sys
+    data = sys.stdin.read().strip().split()
+    N = int(data[0])
+    K = int(data[1])
+    print(count_distinct_network_designs(N, K))
+
+if __name__ == "__main__":
+    main()
