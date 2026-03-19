@@ -1,24 +1,60 @@
-#def can_reach_home_on_time(n, x, y, z, check_times):
-#       time=0
-#   for i in check_times:
-#    time+=i
-#   time+=(y*n)+z
-#   return "NO" if x<time else "YES"
-    
-   
-#def main():
-#    import sys
-#    input = sys.stdin.read
-#    data = input().strip().split()
-    
-#    n = int(data[0])
-#    x = int(data[1])
-#   y = int(data[2])
-#    z = int(data[3])
-#    check_times = list(map(int, data[4:4+n]))
-    
-#    result = can_reach_home_on_time(n, x, y, z, check_times)
-#    print(result)
+import bisect
+def user_logic(n, arr, q, queries):
+    """
+    Write your logic here.
+    Parameters:
+        n (int): Number of elements in the array
+        arr (list): List of integers representing the array
+        q (int): Number of queries
+        queries (list): List of integers representing the queries
+    Returns:
+        list: List of integers representing the results for each query
+    """
+    """for i in queries:
+        for j in arr:
+            if i==j or arr[i]>=j:
+                d=arr[j]-queries[i]
+            return arr[j]"""
+    arr.sort()
+    result = []
+    for x in queries:
+        idx = bisect.bisect_left(arr, x)
+        if idx < n:
+            result.append(arr[idx])
+        else:
+            result.append(-1)
+    return result
 
-#if __name__ == '__main__':
-#    main()
+
+def main():
+    import sys
+    input = sys.stdin.read
+    data = input().split()
+    
+    index = 0
+    t = int(data[index])
+    index += 1
+    results = []
+    
+    for _ in range(t):
+        n = int(data[index])
+        index += 1
+        arr = list(map(int, data[index:index + n]))
+        index += n
+        
+        q = int(data[index])
+        index += 1
+        queries = list(map(int, data[index:index + q]))
+        index += q
+        
+        # Call user logic function
+        result = user_logic(n, arr, q, queries)
+        results.extend(result)
+    
+    # Print all results for each query in each test case
+    for res in results:
+        print(res)
+
+
+if __name__ == "__main__":
+    main()
